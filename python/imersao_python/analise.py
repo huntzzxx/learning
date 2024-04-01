@@ -230,6 +230,11 @@ dados = yf.download('MSFT', start = '2020-01-01', end = '2023-12-31', progress =
 dados = dados.reset_index()
 dados
 
+
+dados_treino = dados[dados['Date'] < '2023-07-31']
+dados_teste = dados[dados['Date'] >= '2023-07-31']
+
+
 dados_prophet_treino = dados[['Date', 'Close']].rename(columns = {'Date':'ds', 'Close':'y'})
 
 # Criar e treinar o modelo
