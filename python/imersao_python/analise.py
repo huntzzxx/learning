@@ -220,3 +220,42 @@ mpf.plot(dados.head(60), type = 'candle', figsize = (16, 8), volume = True, mav 
 
 apple_data = yf.download('AAPL', start = '2023-01-01', end = '2023-12-31')
 mpf.plot((apple_data.head(60)), type='candle', figsize = (18,10), volume=True, mav=(7,14), style='yahoo')
+
+
+# Aula 5 - Machine learning e séries temporais de ações
+
+from prophet import Prophet
+
+dados = yf.download('MSFT', start = '2020-01-01', end = '2023-12-31', progress = False)
+dados = dados.reset_index()
+dados
+
+dados_prophet_treino = dados[['Date', 'Close']].rename(columns = {'Date':'ds', 'Close':'y'})
+
+# Criar e treinar o modelo
+modelo = Prophet(weekly_seasonality = True,
+                 yearly_seasonality = True,
+                 daily_seasonality = False)
+
+modelo.add_country_holidays(country_name = 'US')
+
+modelo.fit(dados_prophet_treino)
+
+
+# Criar datas futuras para previsão até o final de 2023
+futuro = modelo.make_future_dataframe(periods = 150)
+previsao = modelo.predict(futuro)
+
+
+# Plotar os dados de treino, teste e previsões
+plt.figure(figsize = (14, 8))
+plt.plot(dados_treino['Date'], dados_treino['Close'], label = 'Dados de treino', color = 'blue')
+plt.plot(dados_teste['Date'], dados_teste['Close'], label = 'Dados reais (Teste)', color = 'green')
+plt.plot(previsao['ds'], previsao['yhat'], label = 'Previsão', color = 'orange', linestyle = '--')
+
+plt.axvline(dados_treino['Date'].max(), color = 'red', linestyle = '--', label = 'Início da previsão')
+plt.xlabel('Data')
+plt.ylabel('Preço de fechamento')
+plt.title('Previsão de preço de fechamento vs dados reais')
+plt.legend()
+plt.show()
